@@ -13,6 +13,12 @@
 #define MAXNAME      32                 // length of relName, attrName
 #define MAXSTRINGLEN 255                // max. length of string attribute
 
+/** my own CHKSTAT function **/
+#define CHKSTAT(c) { if(c != OK) { \
+                          return c; \
+                        } \
+                      }
+
 
 // schema of relation catalog:
 //   relation name : char(32)           <-- lookup key

@@ -1,11 +1,30 @@
 #include "catalog.h"
 
+/* as reference
+typedef struct {
+  char relName[MAXNAME];                // relation name
+  char attrName[MAXNAME];               // attribute name
+  int attrOffset;                       // attribute offset
+  int attrType;                         // attribute type
+  int attrLen;                          // attribute length
+} AttrDesc;
+*/
+
+/* as reference
+typedef struct {
+  char relName[MAXNAME];                // relation name
+  char attrName[MAXNAME];               // attribute name
+  int  attrType;                        // INTEGER, FLOAT, or STRING
+  int  attrLen;                         // length of attribute in bytes
+  void *attrValue;                      // ptr to binary value
+} attrInfo; 
+ */
 
 const Status RelCatalog::createRel(const string & relation, 
 				   const int attrCnt,
 				   const attrInfo attrList[])
 {
-  Status status;
+  Status s;
   RelDesc rd;
   AttrDesc ad;
 
@@ -15,10 +34,24 @@ const Status RelCatalog::createRel(const string & relation,
   if (relation.length() >= sizeof rd.relName)
     return NAMETOOLONG;
 
-
-
-
-
-
+  /** my code starts here **/
+  s = getInfo(relation, rd);
+  if(s == OK) return RELEXISTS;
+  strcpy(rd.relName, relation);
+  rd.attrCnt = attrCnt;
+  s = addInfo(rd);
+  CHKSTAT(s);
+  for(int i = 0; i < attrCnt; i++){
+    strcpy(ad.relName, attrList[i].relName);
+    strcpy(ad.attrName, attrList[i].attrName);
+    ad.attrOffset = i;
+    ad.attrType = attrList[i].attrType;
+    ad.attrLen = attrList[i].attrLen;
+    s = attrCat->addInfo(ad);
+    CHKSTAT(s);
+  }
+  s = createHeapFile(relation);
+  CHKSTAT(s);
+  return OK;
 }
 
