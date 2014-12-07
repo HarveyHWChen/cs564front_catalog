@@ -37,7 +37,7 @@ const Status RelCatalog::createRel(const string & relation,
   /** my code starts here **/
   s = getInfo(relation, rd);
   if(s == OK) return RELEXISTS;
-  strcpy(rd.relName, relation);
+  strcpy(rd.relName, relation.c_str());
   rd.attrCnt = attrCnt;
   s = addInfo(rd);
   CHKSTAT(s);

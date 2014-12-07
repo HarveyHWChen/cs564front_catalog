@@ -20,7 +20,7 @@ const Status RelCatalog::getInfo(const string & relation, RelDesc &record)
   /** my code starts here **/
   HeapFileScan sc(RELCATNAME, s);
   CHKSTAT(s);
-  sc.startScan(0, MAXNAME, STRING, relation, EQ);
+  sc.startScan(0, MAXNAME, STRING, relation.c_str(), EQ);
   s = sc.scanNext(rid);
   CHKSTAT(s); // 
   s = sc.getRecord(rec);
@@ -39,7 +39,7 @@ const Status RelCatalog::addInfo(RelDesc & record)
   /** my code starts here **/
   ifs = new InsertFileScan(RELCATNAME, s);
   CHKSTAT(s);
-  Record rec((void*)(&record), sizeof(RelDesc));
+  Record rec = {(void*)(&record), sizeof(RelDesc)};
   s = ifs->insertRecord(rec, rid);
   CHKSTAT(s);
   delete ifs;
@@ -58,7 +58,7 @@ const Status RelCatalog::removeInfo(const string & relation)
   /** my code starts here **/
   hfs = new HeapFileScan(RELCATNAME, s);
   CHKSTAT(s);
-  s = hfs->startScan(0, MAXNAME, STRING, relation, EQ);
+  s = hfs->startScan(0, MAXNAME, STRING, relation.c_str(), EQ);
   CHKSTAT(s);
   s = hfs->scanNext(rid);
   CHKSTAT(s);
@@ -98,17 +98,17 @@ const Status AttrCatalog::getInfo(const string & relation,
   /** my code starts here **/
   hfs = new HeapFileScan(ATTRCATNAME, s);
   CHKSTAT(s);
-  s = hfs->startScan(0, MAXNAME, STRING, relName, EQ);
+  s = hfs->startScan(0, MAXNAME, STRING, relation.c_str(), EQ);
   CHKSTAT(s);
   AttrDesc* pAttr = NULL;
-  while(pAttr == NULL || strcmp(pAttr->attrName, attrName) != 0){
+  while(pAttr == NULL || strcmp(pAttr->attrName, attrName.c_str()) != 0){
     s = hfs->scanNext(rid);
     CHKSTAT(s);
     s = hfs->getRecord(rec);
     CHKSTAT(s);
     pAttr = (AttrDesc*)(rec.data);
   }
-  memcpy(record, rec.data, rec.length);
+  memcpy((void*)&record, rec.data, rec.length);
   delete hfs;
   hfs = NULL;
   return OK;
@@ -124,7 +124,7 @@ const Status AttrCatalog::addInfo(AttrDesc & record)
   /** my code starts here**/
   ifs = new InsertFileScan(ATTRCATNAME, s);
   CHKSTAT(s);
-  Record rec((void*)&(record), sizeof(AttrDesc));
+  Record rec = {(void*)&(record), sizeof(AttrDesc)};
   s = ifs->insertRecord(rec, rid);
   CHKSTAT(s);
 
@@ -148,10 +148,10 @@ const Status AttrCatalog::removeInfo(const string & relation,
   /** my code starts here **/
   hfs = new HeapFileScan(ATTRCATNAME, s);
   CHKSTAT(s);
-  hfs->startScan(0, MAXNAME, STRING, relName, EQ);
+  hfs->startScan(0, MAXNAME, STRING, relation.c_str(), EQ);
   CHKSTAT(s);
   AttrDesc* pAttr = NULL;
-  while(pAttr == NULL || strcmp(pAttr->attrName, attrName) != 0){
+  while(pAttr == NULL || strcmp(pAttr->attrName, attrName.c_str()) != 0){
     s = hfs->scanNext(rid);
     CHKSTAT(s);
     s = hfs->getRecord(rec);
@@ -181,7 +181,7 @@ const Status AttrCatalog::getRelInfo(const string & relation,
   /** my code starts here **/
   hfs = new HeapFileScan(RELCATNAME, s);
   CHKSTAT(s);
-  s = hfs->startScan(0, MAXNAME, STRING, relation, EQ);
+  s = hfs->startScan(0, MAXNAME, STRING, relation.c_str(), EQ);
   CHKSTAT(s);
   s = hfs->scanNext(rid);
   CHKSTAT(s);
@@ -192,13 +192,13 @@ const Status AttrCatalog::getRelInfo(const string & relation,
   delete hfs;
   hfs = new HeapFileScan(ATTRCATNAME, s);
   CHKSTAT(s);
-  s = hfs->startScan(0, MAXNAME, STRING, relation, EQ);  
+  s = hfs->startScan(0, MAXNAME, STRING, relation.c_str(), EQ);  
   CHKSTAT(s);
   // retrieve all AttrDesc
   for(int i = 0; i < attrCnt; i++){
-    s = scanNext(rid);
+    s = hfs->scanNext(rid);
     CHKSTAT(s);
-    s = getRecord(rec);
+    s = hfs->getRecord(rec);
     CHKSTAT(s);
     memcpy(attrs+i, rec.data, rec.length);
   }

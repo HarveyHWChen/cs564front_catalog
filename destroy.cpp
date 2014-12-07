@@ -26,11 +26,11 @@ const Status RelCatalog::destroyRel(const string & relation)
   // delete from relCat
   HeapFileScan* hfs = new HeapFileScan(RELCATNAME, s);
   CHKSTAT(s);
-  s = hfs->startScan(0, MAXNAME, STRING, relation, EQ); 
+  s = hfs->startScan(0, MAXNAME, STRING, relation.c_str(), EQ); 
   CHKSTAT(s);
-  s = scanNext(rid);
+  s = hfs->scanNext(rid);
   CHKSTAT(s);
-  s = getRecord(rec);
+  s = hfs->getRecord(rec);
   CHKSTAT(s);
   RelDesc* pRd = (RelDesc*) rec.data;
   int attrCnt = pRd->attrCnt;
@@ -41,24 +41,24 @@ const Status RelCatalog::destroyRel(const string & relation)
   hfs = new HeapFileScan(ATTRCATNAME, s);
   string* attrNames = new string[attrCnt];
   CHKSTAT(s);
-  s = hfs->startScan(0, MAXNAME, STRING, relation, EQ);
+  s = hfs->startScan(0, MAXNAME, STRING, relation.c_str(), EQ);
   CHKSTAT(s);
   for(int i = 0; i < attrCnt; i++){
-    s = scanNext(rid);
+    s = hfs->scanNext(rid);
     CHKSTAT(s);
-    s = getRecord(rec);
+    s = hfs->getRecord(rec);
     CHKSTAT(s);
     AttrDesc* pAttr = (AttrDesc*) rec.data;
-    attrNames[i] = Attr->attrName;
+    attrNames[i] = pAttr->attrName;
   }
   for(int i = 0; i < attrCnt; i++){
-    s = attrCat->removeInfo(relName, attrNames[i]);
+    s = attrCat->removeInfo(relation, attrNames[i]);
     CHKSTAT(s);
   }
   delete hfs;
   hfs = NULL;
   // destroy heapfile
-  s = destroyHeapFile(relName);
+  s = destroyHeapFile(relation);
   CHKSTAT(s);
   return OK;
 }
@@ -79,17 +79,19 @@ const Status AttrCatalog::dropRelation(const string & relation)
   Status s;
   AttrDesc *attrs;
   int attrCnt;
+  Record rec;
+  RID rid;
 
   if (relation.empty()) return BADCATPARM;
 
   /** my code starts here **/
   HeapFileScan* hfs = new HeapFileScan(RELCATNAME, s);
   CHKSTAT(s);
-  s = hfs->startScan(0, MAXNAME, STRING, relation, EQ); 
+  s = hfs->startScan(0, MAXNAME, STRING, relation.c_str(), EQ); 
   CHKSTAT(s);
-  s = scanNext(rid);
+  s = hfs->scanNext(rid);
   CHKSTAT(s);
-  s = getRecord(rec);
+  s = hfs->getRecord(rec);
   CHKSTAT(s);
   RelDesc* pRd = (RelDesc*) rec.data;
   attrCnt = pRd->attrCnt;
@@ -98,15 +100,15 @@ const Status AttrCatalog::dropRelation(const string & relation)
   hfs = new HeapFileScan(ATTRCATNAME, s);
   //attrs = new AttrDesc[attrCnt];
   CHKSTAT(s);
-  s = hfs->startScan(0, MAXNAME, STRING, relation, EQ);
+  s = hfs->startScan(0, MAXNAME, STRING, relation.c_str(), EQ);
   CHKSTAT(s);
   for(int i = 0; i < attrCnt; i++){
-    s = scanNext(rid);
+    s = hfs->scanNext(rid);
     CHKSTAT(s);
     //    s = getRecord(rec);
     //CHKSTAT(s);
     //memcpy(attrs+i, rec.data, rec.length);
-    s = hfs->deleteRecord(rid);
+    s = hfs->deleteRecord();
     CHKSTAT(s);
   }
   /*  for(int i = 0; i < attrCnt; i++){
@@ -115,7 +117,7 @@ const Status AttrCatalog::dropRelation(const string & relation)
     }*/
   delete hfs;
   hfs = NULL;
-
+  return OK;
 
 
 }
