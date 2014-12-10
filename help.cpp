@@ -37,6 +37,11 @@ const Status RelCatalog::help(const string & relation)
   if (relation.empty()) return UT_Print(RELCATNAME);
 
   /** my code starts here **/
+  // check if relation exists
+  s = relCat->getInfo(relation, rd);
+  if(s != OK){
+    return RELNOTFOUND;
+  }
   HeapFileScan* hfs = new HeapFileScan(RELCATNAME, s);
   CHKSTAT(s);
   s = hfs->startScan(0, MAXNAME, STRING, relation.c_str(), EQ);
@@ -47,7 +52,7 @@ const Status RelCatalog::help(const string & relation)
   memcpy((void*)&rd, rec.data, rec.length);
   printf("Relation name: %s, (%d Attributes)\n", rd.relName, rd.attrCnt);
   printf("==========================================\n");
-  printf("Attribute Name\t\tOffset\tType\tLength\n");
+  printf("Attribute Name\tOffset\tType\tLength\n");
   delete hfs;
   hfs = new HeapFileScan(ATTRCATNAME, s);
   CHKSTAT(s);

@@ -26,7 +26,9 @@ const Status RelCatalog::destroyRel(const string & relation)
   /** check if relation exists **/
   RelDesc rel;
   s = relCat->getInfo(relation, rel);
-  CHKSTAT(s);
+  if(s != OK){
+    return RELNOTFOUND;
+  }
   /** drop relation in attibute catalog **/
   attrCat->dropRelation(relation);
   /** remove information in relation catalog **/
