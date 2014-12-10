@@ -51,6 +51,7 @@ const Status UT_Load(const string & relation, const string & fileName)
   memcpy((void*)&rd, rRec.data, rRec.length);
   attrCnt = rd.attrCnt;
   // get total length of record
+  hfs->endScan();  
   delete hfs;
   attrs = new AttrDesc[attrCnt];
   hfs = new HeapFileScan(ATTRCATNAME, s);
@@ -64,6 +65,9 @@ const Status UT_Load(const string & relation, const string & fileName)
     memcpy((void*)(attrs+i), rRec.data, rRec.length);
     width += attrs[i].attrLen;
   }
+  hfs->endScan();
+  delete hfs;
+  hfs = NULL;
   //printf("total length of record: %d", width);
   // start insertFileScan on relation
   iFile = new InsertFileScan(relation.c_str(), s);
@@ -87,6 +91,8 @@ const Status UT_Load(const string & relation, const string & fileName)
   }
 
   // close heap file and unix file
+  delete iFile;
+  iFile = NULL;
   if (close(fd) < 0) return UNIXERR;
 
   return OK;

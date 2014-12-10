@@ -13,7 +13,7 @@ LDFLAGS =
 
 CXX =	         g++
 
-CXXFLAGS =	-std=c++11 -g -DDEBUG #-DDEBUGIND -DDEBUGBUF
+CXXFLAGS =	-std=c++0x -g -DDEBUG #-DDEBUGIND -DDEBUGBUF
 
 MAKEFILE =	Makefile
 

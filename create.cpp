@@ -65,10 +65,12 @@ const Status RelCatalog::createRel(const string & relation,
   rd.attrCnt = attrCnt;
   s = addInfo(rd);
   CHKSTAT(s);
+  int offset = 0;
   for(int i = 0; i < attrCnt; i++){
     strcpy(ad.relName, attrList[i].relName);
     strcpy(ad.attrName, attrList[i].attrName);
-    ad.attrOffset = i;
+    ad.attrOffset = offset;
+    offset += attrList[i].attrLen;
     ad.attrType = attrList[i].attrType;
     ad.attrLen = attrList[i].attrLen;
     s = attrCat->addInfo(ad);
