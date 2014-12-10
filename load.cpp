@@ -15,7 +15,7 @@
 
 const Status UT_Load(const string & relation, const string & fileName)
 {
-  Status status;
+  Status s;
   RelDesc rd;
   AttrDesc *attrs;
   int attrCnt;
@@ -33,18 +33,22 @@ const Status UT_Load(const string & relation, const string & fileName)
     return UNIXERR;
 
   // get relation data
-  
-
-
-
+  HeapFileScan* hfs = new HeapFileScan(RELCATNAME, s);
+  CHKSTAT(s);
+  s = hfs->startScan(0, MAXNAME, STRING, relation.c_str(), EQ);
+  CHKSTAT(s);
+  RID outRid;
+  s = hfs->scanNext(outRid);
+  CHKSTAT(s);
+  Record rRec;
+  s = hfs->getRecord(rRec);
+  CHKSTAT(s);
+  memcpy((void*)&rd, rRec.data, rRec.length);
+  attrCnt = rd.attrCnt;
+  width = attrCnt * MAXSTRINGLEN;
   // start insertFileScan on relation
-
-
-
-
-
-
-
+  iFile = new InsertFileScan(ATTRCATNAME, s);
+  CHKSTAT(s);
 
   // allocate buffer to hold record read from unix file
   char *record;
@@ -59,7 +63,7 @@ const Status UT_Load(const string & relation, const string & fileName)
     RID rid;
     rec.data = record;
     rec.length = width;
-    if ((status = iFile->insertRecord(rec, rid)) != OK) return status;
+    if ((s = iFile->insertRecord(rec, rid)) != OK) return s;
     records++;
   }
 

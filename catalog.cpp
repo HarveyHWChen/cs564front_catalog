@@ -140,7 +140,7 @@ const Status AttrCatalog::removeInfo(const string & relation,
   Status s;
   Record rec;
   RID rid;
-  AttrDesc record;
+  //AttrDesc record;
   HeapFileScan*  hfs;
 
   if (relation.empty() || attrName.empty()) return BADCATPARM;

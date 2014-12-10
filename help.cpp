@@ -28,15 +28,45 @@ using namespace std;
 
 const Status RelCatalog::help(const string & relation)
 {
-  Status status;
+  Status s;
   RelDesc rd;
   AttrDesc *attrs;
   int attrCnt;
-
+  RID rid;
+  Record rec;
   if (relation.empty()) return UT_Print(RELCATNAME);
 
   /** my code starts here **/
-  
-
+  HeapFileScan* hfs = new HeapFileScan(RELCATNAME, s);
+  CHKSTAT(s);
+  s = hfs->startScan(0, MAXNAME, STRING, relation.c_str(), EQ);
+  s = hfs->scanNext(rid);
+  CHKSTAT(s);
+  s = hfs->getRecord(rec);
+  CHKSTAT(s);
+  memcpy((void*)&rd, rec.data, rec.length);
+  printf("Relation name: %s, (%d Attributes)\n", rd.relName, rd.attrCnt);
+  printf("==========================================\n");
+  printf("Attribute Name\t\tOffset\tType\tLength\n");
+  delete hfs;
+  hfs = new HeapFileScan(ATTRCATNAME, s);
+  CHKSTAT(s);
+  s = hfs->startScan(0, MAXNAME, STRING, relation.c_str(), EQ);
+  CHKSTAT(s);
+  attrs = new AttrDesc[rd.attrCnt];
+  for(int i = 0; i < rd.attrCnt; i++){
+    s = hfs->scanNext(rid);
+    CHKSTAT(s);
+    s = hfs->getRecord(rec);
+    CHKSTAT(s);
+    memcpy(attrs+i, rec.data, rec.length);
+  }
+  for(int i = 0; i < rd.attrCnt; i++){
+    printf("%s\t\t%d\t%d\t%d\n", attrs[i].attrName, attrs[i].attrOffset, attrs[i].attrType, attrs[i].attrLen);
+  }
+  delete[] attrs;
+  attrs = NULL;
+  delete hfs;
+  hfs = NULL;
   return OK;
 }
