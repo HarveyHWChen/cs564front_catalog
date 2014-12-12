@@ -66,6 +66,8 @@ const Status UT_Load(const string & relation, const string & fileName)
     width += attrs[i].attrLen;
   }
   hfs->endScan();
+  delete[] attrs;
+  attrs = NULL;
   delete hfs;
   hfs = NULL;
   //printf("total length of record: %d", width);
